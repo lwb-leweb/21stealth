@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/require_auth.php';
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
 
 $cache_file = sys_get_temp_dir() . '/21stealth_prices.json';
 $cache_ttl  = 60; // 1 minute
