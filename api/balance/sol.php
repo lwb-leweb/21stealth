@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/../require_auth.php';
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
 
 $address = $_GET['address'] ?? '';
 
