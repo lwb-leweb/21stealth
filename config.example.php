@@ -11,4 +11,5 @@ return [
     'db_name'            => '',   // MySQL database name
     'db_user'            => '',   // MySQL user
     'db_pass'            => '',   // MySQL password
+    'app_key'            => '',   // generate with: openssl rand -hex 32
 ];
