@@ -1,6 +1,6 @@
 <?php
-header('Content-Type: application/json');
 require_once __DIR__ . '/require_auth.php';
+header('Content-Type: application/json');
 
 $cache_file = sys_get_temp_dir() . '/21stealth_price_history.json';
 $cache_ttl  = 3600; // 1 hour — historical daily closes don't change, today's may still update
