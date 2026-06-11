@@ -11,28 +11,48 @@ if (file_exists($cache_file) && time() - filemtime($cache_file) < $cache_ttl) {
     exit;
 }
 
-// Fetch USD prices + 24h change from CryptoCompare (single call)
-$ccResponse = @file_get_contents(
-    'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH,SOL,LTC,DOGE,TRX&tsyms=USD',
+// Fetch USD prices + 24h change from CoinGecko (single call).
+// Works keyless; a free Demo API key in config.php raises the rate limit.
+$ids     = 'bitcoin,ethereum,solana,litecoin,dogecoin,tron';
+$cg_key  = $config['coingecko_api_key'] ?? '';
+$headers = "Accept: application/json\r\nUser-Agent: 21stealth\r\n"
+         . ($cg_key ? "x-cg-demo-api-key: {$cg_key}\r\n" : '');
+
+$cgResponse = @file_get_contents(
+    "https://api.coingecko.com/api/v3/simple/price?ids={$ids}&vs_currencies=usd&include_24hr_change=true",
     false,
-    stream_context_create(['http' => ['timeout' => 10]])
+    stream_context_create(['http' => [
+        'timeout'       => 10,
+        'header'        => $headers,
+        'ignore_errors' => true,
+    ]])
 );
 
-if ($ccResponse === false) {
+$cg = $cgResponse !== false ? (json_decode($cgResponse, true) ?: []) : [];
+
+// If the upstream call failed entirely, fall back to stale cache when available
+if (empty($cg['bitcoin']['usd'])) {
+    if (file_exists($cache_file)) {
+        echo file_get_contents($cache_file);
+        exit;
+    }
     http_response_code(502);
     echo json_encode(['error' => 'Failed to fetch prices']);
     exit;
 }
 
-$cc = json_decode($ccResponse, true)['RAW'] ?? [];
+$coin = fn($id) => [
+    'usd'       => $cg[$id]['usd'] ?? 0,
+    'change24h' => $cg[$id]['usd_24h_change'] ?? null,
+];
 
 $result = json_encode([
-    'bitcoin'  => ['usd' => $cc['BTC']['USD']['PRICE']  ?? 0, 'change24h' => $cc['BTC']['USD']['CHANGEPCT24HOUR']  ?? null],
-    'ethereum' => ['usd' => $cc['ETH']['USD']['PRICE']  ?? 0, 'change24h' => $cc['ETH']['USD']['CHANGEPCT24HOUR']  ?? null],
-    'solana'   => ['usd' => $cc['SOL']['USD']['PRICE']  ?? 0, 'change24h' => $cc['SOL']['USD']['CHANGEPCT24HOUR']  ?? null],
-    'litecoin' => ['usd' => $cc['LTC']['USD']['PRICE']  ?? 0, 'change24h' => $cc['LTC']['USD']['CHANGEPCT24HOUR']  ?? null],
-    'dogecoin' => ['usd' => $cc['DOGE']['USD']['PRICE'] ?? 0, 'change24h' => $cc['DOGE']['USD']['CHANGEPCT24HOUR'] ?? null],
-    'tron'     => ['usd' => $cc['TRX']['USD']['PRICE']  ?? 0, 'change24h' => $cc['TRX']['USD']['CHANGEPCT24HOUR']  ?? null],
+    'bitcoin'  => $coin('bitcoin'),
+    'ethereum' => $coin('ethereum'),
+    'solana'   => $coin('solana'),
+    'litecoin' => $coin('litecoin'),
+    'dogecoin' => $coin('dogecoin'),
+    'tron'     => $coin('tron'),
 ]);
 
 file_put_contents($cache_file, $result);
