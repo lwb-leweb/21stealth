@@ -1,7 +1,7 @@
 {
   "name": "new-project",
   "private": true,
-  "version": "1.5.7",
+  "version": "1.7.0",
   "type": "module",
   "scripts": {
     "generate:ci": "node scripts/generate-ci.js",
