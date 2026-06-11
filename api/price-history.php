@@ -5,14 +5,29 @@ header('Content-Type: application/json');
 $cache_file = sys_get_temp_dir() . '/21stealth_price_history.json';
 $cache_ttl  = 3600; // 1 hour — historical daily closes don't change, today's may still update
 
-if (file_exists($cache_file) && time() - filemtime($cache_file) < $cache_ttl) {
-    echo file_get_contents($cache_file);
-    exit;
-}
-
 // CoinGecko daily history — no API key required.
 // Free tier caps daily granularity at 365 days; days > 90 are returned as daily closes.
 $coins = ['bitcoin', 'ethereum', 'solana', 'litecoin', 'dogecoin', 'tron'];
+
+// A cache is only usable if it decodes to data for every coin. This rejects a
+// poisoned empty/partial cache (e.g. left behind by an earlier failed fetch).
+$cached = null;
+if (file_exists($cache_file)) {
+    $decoded = json_decode(file_get_contents($cache_file), true);
+    if (is_array($decoded)) {
+        $complete = true;
+        foreach ($coins as $id) {
+            if (empty($decoded[$id])) { $complete = false; break; }
+        }
+        if ($complete) $cached = $decoded;
+    }
+}
+
+// Serve a fresh, complete cache without hitting the API.
+if ($cached !== null && time() - filemtime($cache_file) < $cache_ttl) {
+    echo json_encode($cached);
+    exit;
+}
 
 $result = [];
 
@@ -64,20 +79,19 @@ foreach ($coins as $i => $id) {
     if ($priceMap) $result[$id] = $priceMap;
 }
 
-// Only cache a complete result. On any missing coin, serve stale cache rather
-// than freezing a partial dataset for the next hour.
+// Only cache a complete result. On any missing coin, prefer a usable (complete)
+// stale cache; otherwise return whatever partial data we got without caching it.
 if (count($result) < count($coins)) {
-    if (file_exists($cache_file)) {
-        echo file_get_contents($cache_file);
+    if ($cached !== null) {
+        echo json_encode($cached);
         exit;
     }
-    if (empty($result['bitcoin'])) {
-        http_response_code(502);
-        echo json_encode(['error' => 'Failed to fetch price history']);
+    if (!empty($result)) {
+        echo json_encode($result); // partial, better than nothing — not cached
         exit;
     }
-    // No cache to fall back to: return the partial result without caching it.
-    echo json_encode($result);
+    http_response_code(502);
+    echo json_encode(['error' => 'Failed to fetch price history']);
     exit;
 }
 
