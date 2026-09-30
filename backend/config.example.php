@@ -12,4 +12,5 @@ return [
     'db_user'            => '',   // MySQL user
     'db_pass'            => '',   // MySQL password
     'app_key'            => '',   // generate with: openssl rand -hex 32
+    'admin_password'     => '',   // login for stats-dashboard.php; empty = locked
 ];

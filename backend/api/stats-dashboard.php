@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('UTC');
 $config = require __DIR__ . '/../config.php';
+require_once __DIR__ . '/require_admin.php';
 
 $stats = null;
 $error = null;
@@ -53,7 +54,7 @@ try {
 </style>
 </head>
 <body>
-<h1>21 Stealth — Analytics</h1>
+<h1>21 Stealth — Analytics <a href="?logout" style="float:right;font-size:0.8rem;font-weight:400;color:#888">Log out</a></h1>
 
 <?php if ($error): ?>
   <p class="error">Database error: <?= htmlspecialchars($error) ?></p>

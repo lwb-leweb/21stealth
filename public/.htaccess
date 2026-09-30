@@ -6,6 +6,9 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
 RewriteRule .* - [E=BASE:%1]
 
+# Admin shortcuts to the analytics dashboard on the backend host
+RewriteRule ^(admin|stats)/?$ https://21stealth.com/backend/api/stats-dashboard.php [R=302,L]
+
 # SPA fallback: unknown paths go to index.html, the backend is left alone
 RewriteCond %{REQUEST_URI} !/backend/
 RewriteCond %{REQUEST_FILENAME} !-f
