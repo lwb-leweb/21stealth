@@ -1,9 +1,15 @@
+Options -Indexes
 RewriteEngine On
+
+# Determine own URL path (e.g. /backend/api) instead of hardcoding RewriteBase.
+# Some hosts (IONOS) resolve relative targets incorrectly otherwise. This way the same file works on any server.
+RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+RewriteRule .* - [E=BASE:%1]
 
 # Strip .php extension: if the file without .php doesn't exist but with .php does, rewrite
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.+)$ $1.php [L]
+RewriteRule ^(.+)$ %{ENV:BASE}/$1.php [L]
 
 # <FilesMatch "^stats(-dashboard)?\.php$">
 #   AuthType Basic

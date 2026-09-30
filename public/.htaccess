@@ -1,0 +1,13 @@
+Options -Indexes
+RewriteEngine On
+
+# Determine own URL path (empty at web root, otherwise e.g. /subfolder) instead of hardcoding RewriteBase.
+# Some hosts (IONOS) resolve relative targets incorrectly otherwise. This way the same file works on any server.
+RewriteCond %{REQUEST_URI}::$0 ^(/.+)/(.*)::\2$
+RewriteRule .* - [E=BASE:%1]
+
+# SPA fallback: unknown paths go to index.html, the backend is left alone
+RewriteCond %{REQUEST_URI} !/backend/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ %{ENV:BASE}/index.html [L]
