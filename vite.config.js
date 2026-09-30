@@ -41,6 +41,12 @@ export default defineConfig({
       },
     }),
   ],
+  // Dev only: forward API calls to the live backend (no local PHP needed)
+  server: {
+    proxy: {
+      '/backend': { target: 'https://21stealth.com', changeOrigin: true },
+    },
+  },
   resolve: {
     alias: {
       '@':        path.resolve(__dirname, './src'),

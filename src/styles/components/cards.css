@@ -141,57 +141,137 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  position: relative;
 }
 
-.ticker-wrapper::before,
-.ticker-wrapper::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 4rem;
-  z-index: 1;
-  pointer-events: none;
+.ticker-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-base);
 }
 
-.ticker-wrapper::before {
-  left: 0;
-  background: linear-gradient(to right, var(--color-surface), transparent);
+.ticker-toggle:hover {
+  background-color: var(--color-surface-elevated);
 }
 
-.ticker-wrapper::after {
-  right: 0;
-  background: linear-gradient(to left, var(--color-surface), transparent);
+/* Row: coin | sparkline | price + change | chevron */
+.ticker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+}
+
+.ticker-collapse .ticker-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.ticker-coin {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 7rem;
 }
 
 .ticker-symbol {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
+  color: var(--color-text);
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
-.ticker-price {
+.ticker-name {
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+}
+
+.ticker-spark {
+  flex: 1 1 0;
+  min-width: 2rem;
+  max-width: 14rem; /* keeps the line readable on wide screens */
+  height: 1.5rem;
+}
+
+.ticker-spark polyline {
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+
+.ticker-spark-up   { stroke: var(--color-success); }
+.ticker-spark-down { stroke: var(--color-danger); }
+
+.ticker-quote {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Fixed widths so prices and pills line up across rows */
+.ticker-quote .ticker-price {
+  min-width: 5.5rem;
+  text-align: right;
+}
+
+.ticker-price {
+  color: var(--color-text);
+  font-size: 0.875rem;
   font-family: var(--font-mono);
+}
+
+.ticker-change-up,
+.ticker-change-down {
+  min-width: 3.75rem;
+  text-align: center;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  padding: 0.0625rem 0.375rem;
+  border-radius: 9999px;
+}
+
+.ticker-change-up {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 15%, transparent);
+}
+
+.ticker-change-down {
+  color: var(--color-danger);
+  background-color: color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.ticker-chevron,
+.ticker-chevron-spacer {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.ticker-chevron {
+  border-radius: 9999px;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface-elevated);
+  transition: transform var(--transition-base), color var(--transition-base);
+}
+
+.ticker-toggle:hover .ticker-chevron { color: var(--color-text); }
+.ticker-chevron-open { transform: rotate(180deg); }
+
+.ticker-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--transition-base);
+}
+
+.ticker-collapse-open {
+  grid-template-rows: 1fr;
 }
 
 .ticker-skeleton {
   background-color: var(--color-border);
-}
-
-@keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.ticker-track {
-  animation: ticker-scroll 30s linear infinite;
-}
-
-.ticker-track:hover {
-  animation-play-state: paused;
 }
 
 /* ── Chain entry (used in EditWalletModal) ───────────── */
