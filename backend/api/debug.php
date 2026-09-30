@@ -1,0 +1,5 @@
+  <?php                                                                                                                                                         
+  header('Content-Type: application/json');                                                                                                                     
+  header('Access-Control-Allow-Origin: *');                                                                                                                       ini_set('display_errors', 1);
+  error_reporting(E_ALL);                                                                                                                                                                                                                                                                                                       
+  $_GET['address'] = 'TAxrZhuHkPhZnwneKZ9xygDw2MJivJRepe';                                                                                                        include __DIR__ . '/balance/trx.php';
